@@ -16,7 +16,9 @@
     <name>mockservice</name>
 
     <properties>
+        <basepom.check.fail-all>false</basepom.check.fail-all>
         <dropwizard.version>1.1.4</dropwizard.version>
+        <basepom.shaded.main-class>com.zuora.mockservice.MockServiceApplication</basepom.shaded.main-class>
     </properties>
 
     <dependencyManagement>

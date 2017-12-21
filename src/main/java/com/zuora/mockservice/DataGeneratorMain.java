@@ -29,7 +29,7 @@ public class DataGeneratorMain {
 
         TpchSql tpchSql = new TpchSql(dbi);
 
-        double scale = 0.1; // 0.01;
+        double scale = 1; // 0.01;
 
 
         System.out.println("LineItem");

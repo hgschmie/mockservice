@@ -29,25 +29,25 @@ public class TpchSql {
     }
 
     private static final String INSERT_PART =
-            "INSERT INTO PART (ROW_KEY,    P_PARTKEY, P_NAME, P_MFGR,       P_BRAND, P_TYPE, P_SIZE, P_CONTAINER, P_RETAILPRICE, P_COMMENT)"
+            "INSERT INTO PART (ROW_KEY,    PARTKEY, NAME, MFGR,       BRAND, TYPE, SIZE, CONTAINER, RETAILPRICE, COMMENT)"
                     + " VALUES (:rowNumber, :partKey,  :name, :manufacturer, :brand,  :type,  :size,  :container,  :retailPrice,  :comment)";
 
-    private static final String INSERT_SUPPLIER = "INSERT INTO SUPPLIER (row_key, S_SUPPKEY, S_NAME, S_ADDRESS, S_NATIONKEY, S_PHONE, S_ACCTBAL, S_COMMENT)"
+    private static final String INSERT_SUPPLIER = "INSERT INTO SUPPLIER (row_key, SUPPKEY, NAME, ADDRESS, NATIONKEY, PHONE, ACCTBAL, COMMENT)"
             + " VALUES (:rowNumber, :supplierKey, :name, :address, :nationKey, :phone, :accountBalance, :comment)";
 
-    private static final String INSERT_PARTSUPP = "INSERT INTO PARTSUPP (row_key, PS_PARTKEY, PS_SUPPKEY, PS_AVAILQTY, PS_SUPPLYCOST, PS_COMMENT)"
+    private static final String INSERT_PARTSUPP = "INSERT INTO PARTSUPP (row_key, PARTKEY, SUPPKEY, AVAILQTY, SUPPLYCOST, COMMENT)"
             + "      VALUES          (:rowNumber, :partKey, :supplierKey, :availableQuantity, :supplyCost, :comment)";
 
     private static final String INSERT_CUSTOMER =
-            "INSERT INTO CUSTOMER (row_key, C_CUSTKEY, C_NAME, C_ADDRESS, C_NATIONKEY, C_PHONE, C_ACCTBAL, C_MKTSEGMENT, C_COMMENT)"
+            "INSERT INTO CUSTOMER (row_key, CUSTKEY, NAME, ADDRESS, NATIONKEY, PHONE, ACCTBAL, MKTSEGMENT, COMMENT)"
                     + "      VALUES          (:rowNumber, :customerKey, :name, :address, :nationKey, :phone, :accountBalance, :marketSegment, :comment)";
 
     private static final String INSERT_ORDERS =
-            "INSERT INTO ORDERS (row_key, O_ORDERKEY, O_CUSTKEY, O_ORDERSTATUS, O_TOTALPRICE, O_ORDERDATE, O_ORDERPRIORITY, O_CLERK, O_SHIPPRIORITY, O_COMMENT)"
+            "INSERT INTO ORDERS (row_key, ORDERKEY, CUSTKEY, ORDERSTATUS, TOTALPRICE, ORDERDATE, ORDERPRIORITY, CLERK, SHIPPRIORITY, COMMENT)"
                     + "      VALUES          (:rowNumber, :orderKey, :customerKey, :orderStatus, :totalPrice, :orderDate, :orderPriority, :clerk, :shipPriority, :comment)";
 
     private static final String INSERT_LINEITEM =
-            "INSERT INTO LINEITEM (row_key, L_ORDERKEY, L_PARTKEY, L_SUPPKEY, L_LINENUMBER, L_QUANTITY, L_EXTENDEDPRICE, L_DISCOUNT, L_TAX, L_RETURNFLAG, L_LINESTATUS, L_SHIPDATE, L_COMMITDATE, L_RECEIPTDATE, L_SHIPINSTRUCT, L_SHIPMODE, L_COMMENT)"
+            "INSERT INTO LINEITEM (row_key, ORDERKEY, PARTKEY, SUPPKEY, LINENUMBER, QUANTITY, EXTENDEDPRICE, DISCOUNT, TAX, RETURNFLAG, LINESTATUS, SHIPDATE, COMMITDATE, RECEIPTDATE, SHIPINSTRUCT, SHIPMODE, COMMENT)"
                     + " VALUES (:rowNumber, :orderKey, :partKey, :supplierKey, :lineNumber, :quantity, :extendedPrice, :discount, :tax, :returnFlag, :lineStatus, :shipDate, :commitDate, :receiptDate, :shipInstructions, :shipMode, :comment)";
 
 
@@ -200,10 +200,10 @@ public class TpchSql {
     }
 
     public interface TpchSqlInt extends Closeable {
-        @SqlUpdate("INSERT INTO NATION (row_key, N_NATIONKEY, N_NAME, N_REGIONKEY, N_COMMENT) VALUES (:rowNumber, :nationKey, :name, :regionKey, :comment)")
+        @SqlUpdate("INSERT INTO NATION (row_key, NATIONKEY, NAME, REGIONKEY, COMMENT) VALUES (:rowNumber, :nationKey, :name, :regionKey, :comment)")
         int insertNation(@BindBean Nation nation);
 
-        @SqlUpdate("INSERT INTO REGION (row_key, R_REGIONKEY, R_NAME, R_COMMENT) VALUES (:rowNumber, :regionKey, :name, :comment)")
+        @SqlUpdate("INSERT INTO REGION (row_key, REGIONKEY, NAME, COMMENT) VALUES (:rowNumber, :regionKey, :name, :comment)")
         int insertRegion(@BindBean Region region);
 
         @Override

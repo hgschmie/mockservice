@@ -5,6 +5,7 @@ import com.zuora.mockservice.mappers.TpchDao;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.airlift.tpch.Customer;
 import io.airlift.tpch.CustomerColumn;
@@ -23,6 +24,7 @@ import io.airlift.tpch.RegionColumn;
 import io.airlift.tpch.Supplier;
 import io.airlift.tpch.SupplierColumn;
 import io.airlift.tpch.TpchColumn;
+import io.airlift.tpch.TpchColumnType;
 import io.airlift.tpch.TpchColumnTypes;
 import io.airlift.tpch.TpchEntity;
 import org.skife.jdbi.v2.ResultIterator;
@@ -42,8 +44,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-public abstract class AbstractTpchResource<E extends TpchEntity>
-{
+public abstract class AbstractTpchResource<E extends TpchEntity> {
+
     private static final ImmutableMap<Class<? extends TpchEntity>, Class<? extends TpchColumn<? extends TpchEntity>>> COLUMN_MAP;
 
     static {
@@ -61,81 +63,73 @@ public abstract class AbstractTpchResource<E extends TpchEntity>
     }
 
     @Path("/customer")
-    public static class CustomerResource extends AbstractTpchResource<Customer>
-    {
+    public static class CustomerResource extends AbstractTpchResource<Customer> {
+
         public CustomerResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(Customer.class, objectMapper, tpchDao);
         }
     }
 
     @Path("/order")
-    public static class OrderResource extends AbstractTpchResource<Order>
-    {
+    public static class OrderResource extends AbstractTpchResource<Order> {
+
         public OrderResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(Order.class, objectMapper, tpchDao);
         }
     }
 
     @Path("/part")
-    public static class PartResource extends AbstractTpchResource<Part>
-    {
+    public static class PartResource extends AbstractTpchResource<Part> {
+
         public PartResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(Part.class, objectMapper, tpchDao);
         }
     }
 
-    @Path("/part-supplier")
-    public static class PartSupplierResource extends AbstractTpchResource<PartSupplier>
-    {
+    @Path("/partsupplier")
+    public static class PartSupplierResource extends AbstractTpchResource<PartSupplier> {
+
         public PartSupplierResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(PartSupplier.class, objectMapper, tpchDao);
         }
     }
 
     @Path("/supplier")
-    public static class SupplierResource extends AbstractTpchResource<Supplier>
-    {
+    public static class SupplierResource extends AbstractTpchResource<Supplier> {
+
         public SupplierResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(Supplier.class, objectMapper, tpchDao);
         }
     }
 
-    @Path("/line-item")
-    public static class LineItemResource extends AbstractTpchResource<LineItem>
-    {
+    @Path("/lineitem")
+    public static class LineItemResource extends AbstractTpchResource<LineItem> {
+
         public LineItemResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(LineItem.class, objectMapper, tpchDao);
         }
     }
 
     @Path("/region")
-    public static class RegionResource extends AbstractTpchResource<Region>
-    {
+    public static class RegionResource extends AbstractTpchResource<Region> {
+
         public RegionResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(Region.class, objectMapper, tpchDao);
         }
     }
 
     @Path("/nation")
-    public static class NationResource extends AbstractTpchResource<Nation>
-    {
+    public static class NationResource extends AbstractTpchResource<Nation> {
+
         public NationResource(ObjectMapper objectMapper,
-                TpchDao tpchDao)
-        {
+                TpchDao tpchDao) {
             super(Nation.class, objectMapper, tpchDao);
         }
     }
@@ -148,8 +142,7 @@ public abstract class AbstractTpchResource<E extends TpchEntity>
 
     public AbstractTpchResource(Class<E> entityClass,
             ObjectMapper objectMapper,
-            TpchDao tpchDao)
-    {
+            TpchDao tpchDao) {
         this.entityClass = entityClass;
         this.objectMapper = objectMapper;
         this.tpchDao = tpchDao;
@@ -158,8 +151,7 @@ public abstract class AbstractTpchResource<E extends TpchEntity>
     @GET
     @Path("/query")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response query() throws Exception
-    {
+    public Response query() throws Exception {
         ResultIterator<E> stream = tpchDao.streamEntity(entityClass);
         return Response.ok(streamResult(stream)).build();
     }
@@ -167,20 +159,71 @@ public abstract class AbstractTpchResource<E extends TpchEntity>
     @GET
     @Path("/meta")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response meta() throws Exception
-    {
+    public Response meta() throws Exception {
         Class<? extends TpchColumn<? extends TpchEntity>> columnClass = COLUMN_MAP.get(entityClass);
 
-        ImmutableMap.Builder<String, String> resultBuilder = ImmutableMap.builder();
-        resultBuilder.put("rowKey", TpchColumnTypes.INTEGER.getBase().toString());
+        ImmutableList.Builder<ColumnDescriptor> resultBuilder = ImmutableList.builder();
+        ColumnDescriptor columnDescriptor = new ColumnDescriptor("rowNumber", RowKeyColumn.ROW_KEY, true);
+        resultBuilder.add(columnDescriptor);
 
         for (TpchColumn<? extends TpchEntity> column : columnClass.getEnumConstants()) {
             String name = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, column.toString());
-            resultBuilder.put(name, column.getType().getBase().toString());
+            resultBuilder.add(new ColumnDescriptor(name, column, false));
         }
 
-        return Response.ok(resultBuilder.build()).build();
+        return Response.ok(ImmutableMap.of("data", resultBuilder.build())).build();
     }
+
+    public enum RowKeyColumn
+            implements TpchColumn<RowKeyColumn>, TpchEntity {
+        ROW_KEY() {
+            @Override
+            public long getRowNumber() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String toLine() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public double getDouble(RowKeyColumn rowKeyColumn) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public long getIdentifier(RowKeyColumn rowKeyColumn) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public int getInteger(RowKeyColumn rowKeyColumn) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String getString(RowKeyColumn rowKeyColumn) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public int getDate(RowKeyColumn rowKeyColumn) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String getColumnName() {
+                return "_rowkey";
+            }
+
+            @Override
+            public TpchColumnType getType() {
+                return TpchColumnTypes.IDENTIFIER;
+            }
+        }
+    }
+
 
     private StreamingOutput streamResult(ResultIterator<E> stream) {
 
@@ -208,8 +251,7 @@ public abstract class AbstractTpchResource<E extends TpchEntity>
                             LOG.warn("Oops", e);
                         }
                     }
-                }
-                finally {
+                } finally {
                     stream.close();
                     generator.writeEndArray();
                     generator.writeNumberField("count", count.get());

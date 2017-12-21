@@ -73,14 +73,14 @@ public abstract class TpchMappers {
         public Customer map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new Customer(
                     rs.getLong("row_key"),
-                    rs.getLong(CustomerColumn.CUSTOMER_KEY.getColumnName()),
-                    rs.getString(CustomerColumn.NAME.getColumnName()),
-                    rs.getString(CustomerColumn.ADDRESS.getColumnName()),
-                    rs.getLong(CustomerColumn.NATION_KEY.getColumnName()),
-                    rs.getString(CustomerColumn.PHONE.getColumnName()),
-                    convertMoney(rs.getBigDecimal(CustomerColumn.ACCOUNT_BALANCE.getColumnName())),
-                    rs.getString(CustomerColumn.MARKET_SEGMENT.getColumnName()),
-                    rs.getString(CustomerColumn.COMMENT.getColumnName()));
+                    rs.getLong(CustomerColumn.CUSTOMER_KEY.getSimplifiedColumnName()),
+                    rs.getString(CustomerColumn.NAME.getSimplifiedColumnName()),
+                    rs.getString(CustomerColumn.ADDRESS.getSimplifiedColumnName()),
+                    rs.getLong(CustomerColumn.NATION_KEY.getSimplifiedColumnName()),
+                    rs.getString(CustomerColumn.PHONE.getSimplifiedColumnName()),
+                    convertMoney(rs.getBigDecimal(CustomerColumn.ACCOUNT_BALANCE.getSimplifiedColumnName())),
+                    rs.getString(CustomerColumn.MARKET_SEGMENT.getSimplifiedColumnName()),
+                    rs.getString(CustomerColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 
@@ -91,15 +91,15 @@ public abstract class TpchMappers {
         public Order map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new Order(
                     rs.getLong("row_key"),
-                    rs.getLong(OrderColumn.ORDER_KEY.getColumnName()),
-                    rs.getLong(OrderColumn.CUSTOMER_KEY.getColumnName()),
-                    rs.getString(OrderColumn.ORDER_STATUS.getColumnName()).charAt(0),
-                    convertMoney(rs.getBigDecimal(OrderColumn.TOTAL_PRICE.getColumnName())),
-                    convertDate(rs.getDate(OrderColumn.ORDER_DATE.getColumnName())),
-                    rs.getString(OrderColumn.ORDER_PRIORITY.getColumnName()),
-                    rs.getString(OrderColumn.CLERK.getColumnName()),
-                    rs.getInt(OrderColumn.SHIP_PRIORITY.getColumnName()),
-                    rs.getString(OrderColumn.COMMENT.getColumnName()));
+                    rs.getLong(OrderColumn.ORDER_KEY.getSimplifiedColumnName()),
+                    rs.getLong(OrderColumn.CUSTOMER_KEY.getSimplifiedColumnName()),
+                    rs.getString(OrderColumn.ORDER_STATUS.getSimplifiedColumnName()).charAt(0),
+                    convertMoney(rs.getBigDecimal(OrderColumn.TOTAL_PRICE.getSimplifiedColumnName())),
+                    convertDate(rs.getDate(OrderColumn.ORDER_DATE.getSimplifiedColumnName())),
+                    rs.getString(OrderColumn.ORDER_PRIORITY.getSimplifiedColumnName()),
+                    rs.getString(OrderColumn.CLERK.getSimplifiedColumnName()),
+                    rs.getInt(OrderColumn.SHIP_PRIORITY.getSimplifiedColumnName()),
+                    rs.getString(OrderColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 
@@ -110,15 +110,15 @@ public abstract class TpchMappers {
         @Override
         public Part map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new Part(rs.getLong("row_key"),
-                    rs.getLong(PartColumn.PART_KEY.getColumnName()),
-                    rs.getString(PartColumn.NAME.getColumnName()),
-                    rs.getString(PartColumn.MANUFACTURER.getColumnName()),
-                    rs.getString(PartColumn.BRAND.getColumnName()),
-                    rs.getString(PartColumn.TYPE.getColumnName()),
-                    rs.getInt(PartColumn.SIZE.getColumnName()),
-                    rs.getString(PartColumn.CONTAINER.getColumnName()),
-                    convertMoney(rs.getBigDecimal(PartColumn.RETAIL_PRICE.getColumnName())),
-                    rs.getString(PartColumn.COMMENT.getColumnName()));
+                    rs.getLong(PartColumn.PART_KEY.getSimplifiedColumnName()),
+                    rs.getString(PartColumn.NAME.getSimplifiedColumnName()),
+                    rs.getString(PartColumn.MANUFACTURER.getSimplifiedColumnName()),
+                    rs.getString(PartColumn.BRAND.getSimplifiedColumnName()),
+                    rs.getString(PartColumn.TYPE.getSimplifiedColumnName()),
+                    rs.getInt(PartColumn.SIZE.getSimplifiedColumnName()),
+                    rs.getString(PartColumn.CONTAINER.getSimplifiedColumnName()),
+                    convertMoney(rs.getBigDecimal(PartColumn.RETAIL_PRICE.getSimplifiedColumnName())),
+                    rs.getString(PartColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 
@@ -129,22 +129,22 @@ public abstract class TpchMappers {
         @Override
         public LineItem map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new LineItem(rs.getLong("row_key"),
-                    rs.getLong(LineItemColumn.ORDER_KEY.getColumnName()),
-                    rs.getLong(LineItemColumn.PART_KEY.getColumnName()),
-                    rs.getLong(LineItemColumn.SUPPLIER_KEY.getColumnName()),
-                    rs.getInt(LineItemColumn.LINE_NUMBER.getColumnName()),
-                    rs.getLong(LineItemColumn.QUANTITY.getColumnName()),
-                    convertMoney(rs.getBigDecimal(LineItemColumn.EXTENDED_PRICE.getColumnName())),
-                    convertMoney(rs.getBigDecimal(LineItemColumn.DISCOUNT.getColumnName())),
-                    convertMoney(rs.getBigDecimal(LineItemColumn.TAX.getColumnName())),
-                    rs.getString(LineItemColumn.RETURN_FLAG.getColumnName()),
-                    rs.getString(LineItemColumn.STATUS.getColumnName()),
-                    convertDate(rs.getDate(LineItemColumn.SHIP_DATE.getColumnName())),
-                    convertDate(rs.getDate(LineItemColumn.COMMIT_DATE.getColumnName())),
-                    convertDate(rs.getDate(LineItemColumn.RECEIPT_DATE.getColumnName())),
-                    rs.getString(LineItemColumn.SHIP_INSTRUCTIONS.getColumnName()),
-                    rs.getString(LineItemColumn.SHIP_MODE.getColumnName()),
-                    rs.getString(LineItemColumn.COMMENT.getColumnName()));
+                    rs.getLong(LineItemColumn.ORDER_KEY.getSimplifiedColumnName()),
+                    rs.getLong(LineItemColumn.PART_KEY.getSimplifiedColumnName()),
+                    rs.getLong(LineItemColumn.SUPPLIER_KEY.getSimplifiedColumnName()),
+                    rs.getInt(LineItemColumn.LINE_NUMBER.getSimplifiedColumnName()),
+                    rs.getLong(LineItemColumn.QUANTITY.getSimplifiedColumnName()),
+                    convertMoney(rs.getBigDecimal(LineItemColumn.EXTENDED_PRICE.getSimplifiedColumnName())),
+                    convertMoney(rs.getBigDecimal(LineItemColumn.DISCOUNT.getSimplifiedColumnName())),
+                    convertMoney(rs.getBigDecimal(LineItemColumn.TAX.getSimplifiedColumnName())),
+                    rs.getString(LineItemColumn.RETURN_FLAG.getSimplifiedColumnName()),
+                    rs.getString(LineItemColumn.STATUS.getSimplifiedColumnName()),
+                    convertDate(rs.getDate(LineItemColumn.SHIP_DATE.getSimplifiedColumnName())),
+                    convertDate(rs.getDate(LineItemColumn.COMMIT_DATE.getSimplifiedColumnName())),
+                    convertDate(rs.getDate(LineItemColumn.RECEIPT_DATE.getSimplifiedColumnName())),
+                    rs.getString(LineItemColumn.SHIP_INSTRUCTIONS.getSimplifiedColumnName()),
+                    rs.getString(LineItemColumn.SHIP_MODE.getSimplifiedColumnName()),
+                    rs.getString(LineItemColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 
@@ -155,11 +155,11 @@ public abstract class TpchMappers {
         @Override
         public PartSupplier map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new PartSupplier(rs.getLong("row_key"),
-                    rs.getLong(PartSupplierColumn.PART_KEY.getColumnName()),
-                    rs.getLong(PartSupplierColumn.SUPPLIER_KEY.getColumnName()),
-                    rs.getInt(PartSupplierColumn.AVAILABLE_QUANTITY.getColumnName()),
-                    convertMoney(rs.getBigDecimal(PartSupplierColumn.SUPPLY_COST.getColumnName())),
-                    rs.getString(PartSupplierColumn.COMMENT.getColumnName()));
+                    rs.getLong(PartSupplierColumn.PART_KEY.getSimplifiedColumnName()),
+                    rs.getLong(PartSupplierColumn.SUPPLIER_KEY.getSimplifiedColumnName()),
+                    rs.getInt(PartSupplierColumn.AVAILABLE_QUANTITY.getSimplifiedColumnName()),
+                    convertMoney(rs.getBigDecimal(PartSupplierColumn.SUPPLY_COST.getSimplifiedColumnName())),
+                    rs.getString(PartSupplierColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 
@@ -170,13 +170,13 @@ public abstract class TpchMappers {
         @Override
         public Supplier map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new Supplier(rs.getLong("row_key"),
-                    rs.getLong(SupplierColumn.SUPPLIER_KEY.getColumnName()),
-                    rs.getString(SupplierColumn.NAME.getColumnName()),
-                    rs.getString(SupplierColumn.ADDRESS.getColumnName()),
-                    rs.getLong(SupplierColumn.NATION_KEY.getColumnName()),
-                    rs.getString(SupplierColumn.PHONE.getColumnName()),
-                    convertMoney(rs.getBigDecimal(SupplierColumn.ACCOUNT_BALANCE.getColumnName())),
-                    rs.getString(SupplierColumn.COMMENT.getColumnName()));
+                    rs.getLong(SupplierColumn.SUPPLIER_KEY.getSimplifiedColumnName()),
+                    rs.getString(SupplierColumn.NAME.getSimplifiedColumnName()),
+                    rs.getString(SupplierColumn.ADDRESS.getSimplifiedColumnName()),
+                    rs.getLong(SupplierColumn.NATION_KEY.getSimplifiedColumnName()),
+                    rs.getString(SupplierColumn.PHONE.getSimplifiedColumnName()),
+                    convertMoney(rs.getBigDecimal(SupplierColumn.ACCOUNT_BALANCE.getSimplifiedColumnName())),
+                    rs.getString(SupplierColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 
@@ -187,9 +187,9 @@ public abstract class TpchMappers {
         @Override
         public Region map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new Region(rs.getLong("row_key"),
-                    rs.getLong(RegionColumn.REGION_KEY.getColumnName()),
-                    rs.getString(RegionColumn.NAME.getColumnName()),
-                    rs.getString(RegionColumn.COMMENT.getColumnName()));
+                    rs.getLong(RegionColumn.REGION_KEY.getSimplifiedColumnName()),
+                    rs.getString(RegionColumn.NAME.getSimplifiedColumnName()),
+                    rs.getString(RegionColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 
@@ -200,10 +200,10 @@ public abstract class TpchMappers {
         @Override
         public Nation map(int index, ResultSet rs, StatementContext context) throws SQLException {
             return new Nation(rs.getLong("row_key"),
-                    rs.getLong(NationColumn.NATION_KEY.getColumnName()),
-                    rs.getString(NationColumn.NAME.getColumnName()),
-                    rs.getLong(NationColumn.REGION_KEY.getColumnName()),
-                    rs.getString(NationColumn.COMMENT.getColumnName()));
+                    rs.getLong(NationColumn.NATION_KEY.getSimplifiedColumnName()),
+                    rs.getString(NationColumn.NAME.getSimplifiedColumnName()),
+                    rs.getLong(NationColumn.REGION_KEY.getSimplifiedColumnName()),
+                    rs.getString(NationColumn.COMMENT.getSimplifiedColumnName()));
         }
     }
 }
