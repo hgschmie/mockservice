@@ -1,20 +1,18 @@
 database:
-  driverClass: com.mysql.jdbc.Driver
+  driverClass: org.postgresql.Driver
   user: root
   password: root
-
-  url: jdbc:mysql://localhost/tpch?useSSL=false&useCursorFetch=true
-
-  # any properties specific to your JDBC driver:
+  url: jdbc:postgresql://localhost/tpch
   properties:
-    useSSL: false
-    useCursorFetch: true
+    defaultRowFetchSize: 1000
+    readOnly: true
+    ApplicationName: MockService
 
   # the maximum amount of time to wait on an empty pool before throwing an exception
   maxWaitForConnection: 1s
 
   # the SQL query to run when validating a connection's liveness
-  validationQuery: "/* MyService Health Check */ SELECT 1"
+  validationQuery: "/* MockService */ SELECT 1"
 
   # the minimum number of connections to keep open
   minSize: 8

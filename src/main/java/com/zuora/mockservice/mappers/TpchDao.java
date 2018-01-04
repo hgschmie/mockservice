@@ -1,6 +1,7 @@
 package com.zuora.mockservice.mappers;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 
 import com.google.common.collect.ImmutableMap;
 import io.airlift.tpch.Customer;
@@ -13,12 +14,20 @@ import io.airlift.tpch.Region;
 import io.airlift.tpch.Supplier;
 import io.airlift.tpch.TpchEntity;
 import org.skife.jdbi.v2.DBI;
+import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.ResultIterator;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.SQLException;
+import java.util.Locale;
 
 public class TpchDao
 {
-    private static int FETCH_SIZE = 100;
+    private static final Logger LOG = LoggerFactory.getLogger(TpchDao.class);
+
+    public static final int FETCH_SIZE = 1_000;
 
 
     private final DBI dbi;
@@ -58,15 +67,20 @@ public class TpchDao
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends TpchEntity> ResultIterator<E> streamEntity(Class<E> entityClass)
+    public <E extends TpchEntity> ResultIterator<E> streamEntity(Class<E> entityClass) throws SQLException
     {
         checkState(ENTITY_MAP.containsKey(entityClass), "Class %s is not an entity class", entityClass.getSimpleName());
 
-        return (ResultIterator<E>) dbi.open()
+        Handle handle = dbi.open();
+        LOG.info(format(Locale.ENGLISH, "Found autocommit: %s", handle.getConnection().getAutoCommit()));
+        handle.getConnection().setAutoCommit(false);
+
+        return (ResultIterator<E>) handle
                 .createQuery(QUERY_MAP.get(entityClass))
-                .map(ENTITY_MAP.get(entityClass))
-                .setFetchSize(FETCH_SIZE)
                 .cleanupHandle()
+                .setFetchSize(FETCH_SIZE)
+                .fetchForward()
+                .map(ENTITY_MAP.get(entityClass))
                 .iterator();
     }
 }

@@ -19,6 +19,7 @@ import com.zuora.mockservice.resources.AbstractTpchResource.RegionResource;
 import com.zuora.mockservice.resources.AbstractTpchResource.SupplierResource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import io.airlift.tpch.Customer;
 import io.airlift.tpch.LineItem;
 import io.airlift.tpch.Nation;
@@ -47,6 +48,8 @@ public class MockServiceApplication extends Application<MockServiceConfiguration
 
     @Override
     public void initialize(final Bootstrap<MockServiceConfiguration> bootstrap) {
+        bootstrap.addCommand(new DataGeneratorCommand(this));
+
         ObjectMapperProvider objectMapperProvider = new ObjectMapperProvider(Jackson.newObjectMapper());
         bootstrap.setObjectMapper(objectMapperProvider.get());
     }
@@ -54,28 +57,27 @@ public class MockServiceApplication extends Application<MockServiceConfiguration
     @Override
     public void run(final MockServiceConfiguration configuration,
             final Environment environment) {
-        ObjectMapper objectMapper = environment.getObjectMapper();
-        objectMapper.addMixIn(Order.class, OrderMixin.class);
-        objectMapper.addMixIn(Customer.class, CustomerMixin.class);
-        objectMapper.addMixIn(Part.class, PartMixin.class);
-        objectMapper.addMixIn(PartSupplier.class, PartSupplierMixin.class);
-        objectMapper.addMixIn(Supplier.class, SupplierMixin.class);
-        objectMapper.addMixIn(LineItem.class, LineItemMixin.class);
-        objectMapper.addMixIn(Region.class, RegionMixin.class);
-        objectMapper.addMixIn(Nation.class, NationMixin.class);
+
+        ObjectMapperProvider smileObjectMapperProvider = new ObjectMapperProvider(Jackson.newObjectMapper(new SmileFactory()));
+
+        ObjectMapper jsonObjectMapper = environment.getObjectMapper();
+        addMixins(jsonObjectMapper);
+
+        ObjectMapper smileObjectMapper = smileObjectMapperProvider.get();
+        addMixins(smileObjectMapper);
 
         final DBIFactory factory = new DBIFactory();
-        final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mysql");
+        final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 
         final TpchDao tpchDao = new TpchDao(jdbi);
-        final OrderResource orderResource = new OrderResource(objectMapper, tpchDao);
-        final CustomerResource customerResource = new CustomerResource(objectMapper, tpchDao);
-        final PartResource partResource = new PartResource(objectMapper, tpchDao);
-        final PartSupplierResource partSupplierResource = new PartSupplierResource(objectMapper, tpchDao);
-        final SupplierResource supplierResource = new SupplierResource(objectMapper, tpchDao);
-        final LineItemResource lineItemResource = new LineItemResource(objectMapper, tpchDao);
-        final RegionResource regionResource = new RegionResource(objectMapper, tpchDao);
-        final NationResource nationResource = new NationResource(objectMapper, tpchDao);
+        final OrderResource orderResource = new OrderResource(jsonObjectMapper, smileObjectMapper, tpchDao);
+        final CustomerResource customerResource = new CustomerResource(jsonObjectMapper, smileObjectMapper, tpchDao);
+        final PartResource partResource = new PartResource(jsonObjectMapper, smileObjectMapper, tpchDao);
+        final PartSupplierResource partSupplierResource = new PartSupplierResource(jsonObjectMapper, smileObjectMapper, tpchDao);
+        final SupplierResource supplierResource = new SupplierResource(jsonObjectMapper, smileObjectMapper, tpchDao);
+        final LineItemResource lineItemResource = new LineItemResource(jsonObjectMapper, smileObjectMapper, tpchDao);
+        final RegionResource regionResource = new RegionResource(jsonObjectMapper, smileObjectMapper, tpchDao);
+        final NationResource nationResource = new NationResource(jsonObjectMapper, smileObjectMapper, tpchDao);
         environment.jersey().register(orderResource);
         environment.jersey().register(customerResource);
         environment.jersey().register(partResource);
@@ -84,5 +86,18 @@ public class MockServiceApplication extends Application<MockServiceConfiguration
         environment.jersey().register(lineItemResource);
         environment.jersey().register(regionResource);
         environment.jersey().register(nationResource);
+
+        environment.jersey().register(JsonStreamingOutputProvider.class);
+    }
+
+    private void addMixins(ObjectMapper objectMapper) {
+        objectMapper.addMixIn(Order.class, OrderMixin.class);
+        objectMapper.addMixIn(Customer.class, CustomerMixin.class);
+        objectMapper.addMixIn(Part.class, PartMixin.class);
+        objectMapper.addMixIn(PartSupplier.class, PartSupplierMixin.class);
+        objectMapper.addMixIn(Supplier.class, SupplierMixin.class);
+        objectMapper.addMixIn(LineItem.class, LineItemMixin.class);
+        objectMapper.addMixIn(Region.class, RegionMixin.class);
+        objectMapper.addMixIn(Nation.class, NationMixin.class);
     }
 }

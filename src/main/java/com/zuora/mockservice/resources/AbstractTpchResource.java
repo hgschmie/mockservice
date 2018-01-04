@@ -1,5 +1,8 @@
 package com.zuora.mockservice.resources;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import com.zuora.mockservice.DataGeneratorCommand;
 import com.zuora.mockservice.mappers.TpchDao;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -27,19 +30,26 @@ import io.airlift.tpch.TpchColumn;
 import io.airlift.tpch.TpchColumnType;
 import io.airlift.tpch.TpchColumnTypes;
 import io.airlift.tpch.TpchEntity;
+import io.airlift.tpch.TpchTable;
 import org.skife.jdbi.v2.ResultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -47,6 +57,8 @@ import javax.ws.rs.core.StreamingOutput;
 public abstract class AbstractTpchResource<E extends TpchEntity> {
 
     private static final ImmutableMap<Class<? extends TpchEntity>, Class<? extends TpchColumn<? extends TpchEntity>>> COLUMN_MAP;
+
+    public static final String SMILE_MEDIATYPE = "application/x-jackson-smile";
 
     static {
         ImmutableMap.Builder<Class<? extends TpchEntity>, Class<? extends TpchColumn<? extends TpchEntity>>> builder = ImmutableMap.builder();
@@ -65,100 +77,147 @@ public abstract class AbstractTpchResource<E extends TpchEntity> {
     @Path("/customer")
     public static class CustomerResource extends AbstractTpchResource<Customer> {
 
-        public CustomerResource(ObjectMapper objectMapper,
+        public CustomerResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(Customer.class, objectMapper, tpchDao);
+            super(Customer.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.CUSTOMER);
         }
     }
 
-    @Path("/order")
+    @Path("/orders")
     public static class OrderResource extends AbstractTpchResource<Order> {
 
-        public OrderResource(ObjectMapper objectMapper,
+        public OrderResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(Order.class, objectMapper, tpchDao);
+            super(Order.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.ORDERS);
         }
     }
 
     @Path("/part")
     public static class PartResource extends AbstractTpchResource<Part> {
 
-        public PartResource(ObjectMapper objectMapper,
+        public PartResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(Part.class, objectMapper, tpchDao);
+            super(Part.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.PART);
         }
     }
 
-    @Path("/partsupplier")
+    @Path("/partsupp")
     public static class PartSupplierResource extends AbstractTpchResource<PartSupplier> {
 
-        public PartSupplierResource(ObjectMapper objectMapper,
+        public PartSupplierResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(PartSupplier.class, objectMapper, tpchDao);
+            super(PartSupplier.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.PART_SUPPLIER);
         }
     }
 
     @Path("/supplier")
     public static class SupplierResource extends AbstractTpchResource<Supplier> {
 
-        public SupplierResource(ObjectMapper objectMapper,
+        public SupplierResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(Supplier.class, objectMapper, tpchDao);
+            super(Supplier.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.SUPPLIER);
         }
     }
 
     @Path("/lineitem")
     public static class LineItemResource extends AbstractTpchResource<LineItem> {
 
-        public LineItemResource(ObjectMapper objectMapper,
+        public LineItemResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(LineItem.class, objectMapper, tpchDao);
+            super(LineItem.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.LINE_ITEM);
         }
     }
 
     @Path("/region")
     public static class RegionResource extends AbstractTpchResource<Region> {
 
-        public RegionResource(ObjectMapper objectMapper,
+        public RegionResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(Region.class, objectMapper, tpchDao);
+            super(Region.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.REGION);
         }
     }
 
     @Path("/nation")
     public static class NationResource extends AbstractTpchResource<Nation> {
 
-        public NationResource(ObjectMapper objectMapper,
+        public NationResource(ObjectMapper jsonObjectMapper,
+                ObjectMapper smileObjectMapper,
                 TpchDao tpchDao) {
-            super(Nation.class, objectMapper, tpchDao);
+            super(Nation.class, jsonObjectMapper, smileObjectMapper, tpchDao, TpchTable.NATION);
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTpchResource.class);
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper jsonObjectMapper;
+    private final ObjectMapper smileObjectMapper;
     private final TpchDao tpchDao;
     private final Class<E> entityClass;
+    private final TpchTable<E> tpchTable;
 
     public AbstractTpchResource(Class<E> entityClass,
-            ObjectMapper objectMapper,
-            TpchDao tpchDao) {
+            ObjectMapper jsonObjectMapper,
+            ObjectMapper smileObjectMapper,
+            TpchDao tpchDao,
+            TpchTable<E> tpchTable) {
         this.entityClass = entityClass;
-        this.objectMapper = objectMapper;
+        this.jsonObjectMapper = jsonObjectMapper;
+        this.smileObjectMapper = smileObjectMapper;
         this.tpchDao = tpchDao;
+        this.tpchTable = tpchTable;
+    }
+
+    @GET
+    @Path("/count")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response count() throws Exception {
+        AtomicLong count = new AtomicLong();
+        try (ResultIterator<E> stream = tpchDao.streamEntity(entityClass)) {
+            stream.forEachRemaining(consumer -> count.incrementAndGet());
+        }
+        return Response.ok(count.longValue()).build();
+
     }
 
     @GET
     @Path("/query")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response query() throws Exception {
+    @Produces({MediaType.APPLICATION_JSON, SMILE_MEDIATYPE})
+    public Response query(@Context HttpHeaders headers) throws Exception {
+        String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
+        List<MediaType> acceptableType = headers.getAcceptableMediaTypes();
+        checkState(acceptableType.size() == 1);
+
+        ObjectMapper objectMapper = SMILE_MEDIATYPE.equals(acceptableType.get(0)) ? smileObjectMapper : jsonObjectMapper;
+
         ResultIterator<E> stream = tpchDao.streamEntity(entityClass);
-        return Response.ok(streamResult(stream)).build();
+        return Response.ok(streamResult(objectMapper, stream)).build();
     }
 
     @GET
+    @Path("/tpch")
+    @Produces({MediaType.APPLICATION_JSON, SMILE_MEDIATYPE})
+    public Response tpch(@Context HttpHeaders headers) throws Exception {
+        String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
+        List<MediaType> acceptableType = headers.getAcceptableMediaTypes();
+        checkState(acceptableType.size() == 1);
+
+        ObjectMapper objectMapper = SMILE_MEDIATYPE.equals(acceptableType.get(0)) ? smileObjectMapper : jsonObjectMapper;
+
+        Iterable<E> stream = tpchTable.createGenerator(DataGeneratorCommand.SCALE, 1, 1);
+        return Response.ok(streamResult(objectMapper, stream.iterator())).build();
+    }
+
+
+    @GET
     @Path("/meta")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, SMILE_MEDIATYPE})
     public Response meta() throws Exception {
         Class<? extends TpchColumn<? extends TpchEntity>> columnClass = COLUMN_MAP.get(entityClass);
 
@@ -225,7 +284,7 @@ public abstract class AbstractTpchResource<E extends TpchEntity> {
     }
 
 
-    private StreamingOutput streamResult(ResultIterator<E> stream) {
+    private StreamingOutput streamResult(ObjectMapper objectMapper, Iterator<E> stream) {
 
         return new StreamingOutput() {
             @Override
@@ -252,7 +311,9 @@ public abstract class AbstractTpchResource<E extends TpchEntity> {
                         }
                     }
                 } finally {
-                    stream.close();
+                    if (stream instanceof Closeable) {
+                        ((Closeable) stream).close();
+                    }
                     generator.writeEndArray();
                     generator.writeNumberField("count", count.get());
                     generator.writeEndObject();

@@ -133,15 +133,15 @@ public final class TpchMixins {
         @JsonProperty
         abstract long getQuantity();
 
-        @JsonProperty
+        @JsonProperty("extendedPrice")
         @JsonSerialize(using = TpchMoneySerializer.class)
         abstract long getExtendedPriceInCents();
 
-        @JsonProperty
+        @JsonProperty("discount")
         @JsonSerialize(using = TpchMoneySerializer.class)
         abstract long getDiscountPercent();
 
-        @JsonProperty
+        @JsonProperty("tax")
         @JsonSerialize(using = TpchMoneySerializer.class)
         abstract long getTaxPercent();
 
@@ -210,7 +210,7 @@ public final class TpchMixins {
         @JsonProperty
         abstract String getContainer();
 
-        @JsonProperty
+        @JsonProperty("retailPrice")
         @JsonSerialize(using = TpchMoneySerializer.class)
         abstract long getRetailPriceInCents();
 
@@ -239,7 +239,7 @@ public final class TpchMixins {
         @JsonProperty
         abstract int getAvailableQuantity();
 
-        @JsonProperty
+        @JsonProperty("supplyCost")
         @JsonSerialize(using = TpchMoneySerializer.class)
         abstract long getSupplyCostInCents();
 
@@ -276,7 +276,7 @@ public final class TpchMixins {
         @JsonProperty
         abstract String getPhone();
 
-        @JsonProperty
+        @JsonProperty("accountBalance")
         @JsonSerialize(using = TpchMoneySerializer.class)
         abstract long getAccountBalanceInCents();
 
