@@ -58,7 +58,8 @@ public abstract class AbstractTpchResource<E extends TpchEntity> {
 
     private static final ImmutableMap<Class<? extends TpchEntity>, Class<? extends TpchColumn<? extends TpchEntity>>> COLUMN_MAP;
 
-    public static final String SMILE_MEDIATYPE = "application/x-jackson-smile";
+    public static final String APPLICATION_SMILE = "application/x-jackson-smile";
+    public static final MediaType APPLICATION_SMILE_MEDIATYPE = MediaType.valueOf(APPLICATION_SMILE);
 
     static {
         ImmutableMap.Builder<Class<? extends TpchEntity>, Class<? extends TpchColumn<? extends TpchEntity>>> builder = ImmutableMap.builder();
@@ -188,13 +189,13 @@ public abstract class AbstractTpchResource<E extends TpchEntity> {
 
     @GET
     @Path("/query")
-    @Produces({MediaType.APPLICATION_JSON, SMILE_MEDIATYPE})
+    @Produces({MediaType.APPLICATION_JSON, APPLICATION_SMILE})
     public Response query(@Context HttpHeaders headers) throws Exception {
         String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
         List<MediaType> acceptableType = headers.getAcceptableMediaTypes();
         checkState(acceptableType.size() == 1);
 
-        ObjectMapper objectMapper = SMILE_MEDIATYPE.equals(acceptableType.get(0)) ? smileObjectMapper : jsonObjectMapper;
+        ObjectMapper objectMapper = APPLICATION_SMILE_MEDIATYPE.equals(acceptableType.get(0)) ? smileObjectMapper : jsonObjectMapper;
 
         ResultIterator<E> stream = tpchDao.streamEntity(entityClass);
         return Response.ok(streamResult(objectMapper, stream)).build();
@@ -202,13 +203,13 @@ public abstract class AbstractTpchResource<E extends TpchEntity> {
 
     @GET
     @Path("/tpch")
-    @Produces({MediaType.APPLICATION_JSON, SMILE_MEDIATYPE})
+    @Produces({MediaType.APPLICATION_JSON, APPLICATION_SMILE})
     public Response tpch(@Context HttpHeaders headers) throws Exception {
         String accept = headers.getHeaderString(HttpHeaders.ACCEPT);
         List<MediaType> acceptableType = headers.getAcceptableMediaTypes();
         checkState(acceptableType.size() == 1);
 
-        ObjectMapper objectMapper = SMILE_MEDIATYPE.equals(acceptableType.get(0)) ? smileObjectMapper : jsonObjectMapper;
+        ObjectMapper objectMapper = APPLICATION_SMILE_MEDIATYPE.equals(acceptableType.get(0)) ? smileObjectMapper : jsonObjectMapper;
 
         Iterable<E> stream = tpchTable.createGenerator(DataGeneratorCommand.SCALE, 1, 1);
         return Response.ok(streamResult(objectMapper, stream.iterator())).build();
@@ -217,7 +218,7 @@ public abstract class AbstractTpchResource<E extends TpchEntity> {
 
     @GET
     @Path("/meta")
-    @Produces({MediaType.APPLICATION_JSON, SMILE_MEDIATYPE})
+    @Produces({MediaType.APPLICATION_JSON, APPLICATION_SMILE})
     public Response meta() throws Exception {
         Class<? extends TpchColumn<? extends TpchEntity>> columnClass = COLUMN_MAP.get(entityClass);
 
