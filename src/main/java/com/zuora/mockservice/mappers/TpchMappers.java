@@ -43,7 +43,7 @@ public abstract class TpchMappers {
     private static int convertDate(Date date) {
         long instant = date.getTime();
         long day = instant / 86_400_000L; // A day worth of millis
-        return (int) day - (GenerateUtils.MIN_GENERATE_DATE - GenerateUtils.GENERATED_DATE_EPOCH_OFFSET);
+        return (int) day;
     }
 
     private static long convertMoney(BigDecimal value) {
@@ -54,7 +54,7 @@ public abstract class TpchMappers {
     public static class TpchDateSerializer extends JsonSerializer<Integer> {
         @Override
         public void serialize(Integer value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
-            gen.writeString(GenerateUtils.formatDate(value + (GenerateUtils.MIN_GENERATE_DATE - GenerateUtils.GENERATED_DATE_EPOCH_OFFSET)));
+            gen.writeString(GenerateUtils.formatDate(value));
         }
     }
 
