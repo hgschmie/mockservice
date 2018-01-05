@@ -14,6 +14,7 @@
     <packaging>jar</packaging>
 
     <name>mockservice</name>
+    <description>a mock service</description>
 
     <properties>
         <basepom.check.fail-all>false</basepom.check.fail-all>
