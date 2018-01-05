@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.zuora.maven</groupId>
-        <artifactId>zuora-root</artifactId>
-        <version>15</version>
+        <groupId>org.basepom</groupId>
+        <artifactId>basepom-oss</artifactId>
+        <version>24</version>
     </parent>
 
     <groupId>com.zuora.hacking</groupId>
